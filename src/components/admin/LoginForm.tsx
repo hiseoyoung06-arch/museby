@@ -17,7 +17,14 @@ export function LoginForm() {
         <label htmlFor="email" className={labelClass}>
           이메일
         </label>
-        <input id="email" name="email" type="email" required className={inputClass} />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          placeholder="name@whitecube.co.kr"
+          className={inputClass}
+        />
       </div>
       <div>
         <label htmlFor="password" className={labelClass}>

@@ -2,38 +2,54 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createAuthServerClient, getAdminUser } from "@/lib/supabase/server-auth";
+import { timingSafeEqual } from "crypto";
+import {
+  setAdminSession,
+  clearAdminSession,
+  getAdminEmailFromSession,
+} from "@/lib/admin-session";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export type ActionState = { error?: string } | undefined;
+
+const ADMIN_EMAIL_DOMAIN = (process.env.ADMIN_EMAIL_DOMAIN ?? "whitecube.co.kr").toLowerCase();
+
+function passwordMatches(input: string): boolean {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) return false;
+
+  const a = Buffer.from(input);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
 
 export async function adminLogin(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+
   if (!email || !password) {
     return { error: "이메일과 비밀번호를 입력해 주세요." };
   }
+  if (!email.endsWith(`@${ADMIN_EMAIL_DOMAIN}`) || !passwordMatches(password)) {
+    return { error: "이메일 또는 비밀번호가 올바르지 않아요." };
+  }
 
-  const supabase = createAuthServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: "이메일 또는 비밀번호가 올바르지 않아요." };
-
+  setAdminSession(email);
   redirect("/admin/dashboard");
 }
 
 export async function adminLogout() {
-  const supabase = createAuthServerClient();
-  await supabase.auth.signOut();
+  clearAdminSession();
   redirect("/admin/login");
 }
 
-async function requireAdmin() {
-  const user = await getAdminUser();
-  if (!user) redirect("/admin/login");
-  return user;
+function requireAdmin(): string {
+  const email = getAdminEmailFromSession();
+  if (!email) redirect("/admin/login");
+  return email;
 }
 
 export async function adminToggleDelivered(
@@ -41,7 +57,7 @@ export async function adminToggleDelivered(
   winnerId: string,
   delivered: boolean
 ) {
-  await requireAdmin();
+  requireAdmin();
   const supabase = createServiceClient();
   await supabase
     .from("winners")
@@ -58,7 +74,7 @@ export async function adminUpdateWinner(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireAdmin();
+  requireAdmin();
 
   const channelName = String(formData.get("channel_name") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
