@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { buildEventTitle } from "@/lib/format";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { EditEventForm } from "@/components/EditEventForm";
 import { AdminWinnerRow } from "@/components/admin/AdminWinnerRow";
 import type { Winner } from "@/lib/types";
 
@@ -42,6 +43,9 @@ export default async function AdminEventPage({
           🎁 {event.prize} · 당첨 {event.winner_count}명 · 최종 업로드{" "}
           {event.final_upload_date}
         </p>
+        <div className="mt-3">
+          <EditEventForm event={event} role="admin" />
+        </div>
       </div>
 
       <section>

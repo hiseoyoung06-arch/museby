@@ -1,9 +1,19 @@
-import { nanoid } from "nanoid";
+import { nanoid, customAlphabet } from "nanoid";
 
 const WEEKDAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
 
+// Excludes visually ambiguous characters (I, O, 0, 1).
+const generateBrandCodeSuffix = customAlphabet(
+  "ABCDEFGHJKLMNPQRSTUVWXYZ23456789",
+  6
+);
+
 export function generateFormSlug() {
   return nanoid(10);
+}
+
+export function generateBrandCode() {
+  return `MUSEBY-${generateBrandCodeSuffix()}`;
 }
 
 /** final_upload_date(YYYY-MM-DD) + 7일 자정 마감(23:59)의 Date를 반환. */

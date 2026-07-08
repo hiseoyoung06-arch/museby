@@ -3,6 +3,7 @@ import { getBrandIdFromSession } from "@/lib/brand-session";
 import { createServiceClient } from "@/lib/supabase/service";
 import { buildEventTitle, buildEventDescription } from "@/lib/format";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { EditEventForm } from "@/components/EditEventForm";
 import { WinnerRow } from "@/components/brand/WinnerRow";
 import type { Winner } from "@/lib/types";
 
@@ -46,6 +47,9 @@ export default async function BrandEventPage({
           🎁 {event.prize} · 당첨 {event.winner_count}명 · 최종 업로드{" "}
           {event.final_upload_date}
         </p>
+        <div className="mt-3">
+          <EditEventForm event={event} role="brand" />
+        </div>
       </div>
 
       <section>
