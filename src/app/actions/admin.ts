@@ -13,7 +13,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 export type ActionState = { error?: string } | undefined;
 
 function passwordMatches(input: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
+  const expected = process.env.ADMIN_PASSWORD?.trim();
   if (!expected) return false;
 
   const a = Buffer.from(input);
@@ -25,10 +25,16 @@ export async function adminLogin(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const password = String(formData.get("password") ?? "");
+  const password = String(formData.get("password") ?? "").trim();
 
   if (!password) {
     return { error: "비밀번호를 입력해 주세요." };
+  }
+  if (!process.env.ADMIN_PASSWORD) {
+    return {
+      error:
+        "관리자 비밀번호가 아직 서버에 설정되지 않았어요. Vercel 환경변수 ADMIN_PASSWORD를 확인해 주세요.",
+    };
   }
   if (!passwordMatches(password)) {
     return { error: "비밀번호가 올바르지 않아요." };
