@@ -6,13 +6,11 @@ import { timingSafeEqual } from "crypto";
 import {
   setAdminSession,
   clearAdminSession,
-  getAdminEmailFromSession,
+  hasAdminSession,
 } from "@/lib/admin-session";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export type ActionState = { error?: string } | undefined;
-
-const ADMIN_EMAIL_DOMAIN = (process.env.ADMIN_EMAIL_DOMAIN ?? "whitecube.co.kr").toLowerCase();
 
 function passwordMatches(input: string): boolean {
   const expected = process.env.ADMIN_PASSWORD;
@@ -27,17 +25,16 @@ export async function adminLogin(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) {
-    return { error: "이메일과 비밀번호를 입력해 주세요." };
+  if (!password) {
+    return { error: "비밀번호를 입력해 주세요." };
   }
-  if (!email.endsWith(`@${ADMIN_EMAIL_DOMAIN}`) || !passwordMatches(password)) {
-    return { error: "이메일 또는 비밀번호가 올바르지 않아요." };
+  if (!passwordMatches(password)) {
+    return { error: "비밀번호가 올바르지 않아요." };
   }
 
-  setAdminSession(email);
+  setAdminSession();
   redirect("/admin/dashboard");
 }
 
@@ -46,10 +43,8 @@ export async function adminLogout() {
   redirect("/admin/login");
 }
 
-function requireAdmin(): string {
-  const email = getAdminEmailFromSession();
-  if (!email) redirect("/admin/login");
-  return email;
+function requireAdmin() {
+  if (!hasAdminSession()) redirect("/admin/login");
 }
 
 export async function adminToggleDelivered(

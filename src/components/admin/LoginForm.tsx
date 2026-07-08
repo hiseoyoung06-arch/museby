@@ -14,19 +14,6 @@ export function LoginForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div>
-        <label htmlFor="email" className={labelClass}>
-          이메일
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          placeholder="name@whitecube.co.kr"
-          className={inputClass}
-        />
-      </div>
-      <div>
         <label htmlFor="password" className={labelClass}>
           비밀번호
         </label>
@@ -35,6 +22,7 @@ export function LoginForm() {
           name="password"
           type="password"
           required
+          autoFocus
           className={inputClass}
         />
       </div>

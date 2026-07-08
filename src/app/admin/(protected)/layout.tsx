@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAdminEmailFromSession } from "@/lib/admin-session";
+import { hasAdminSession } from "@/lib/admin-session";
 import { adminLogout } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +9,12 @@ export default async function AdminProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const email = getAdminEmailFromSession();
-  if (!email) redirect("/admin/login");
+  if (!hasAdminSession()) redirect("/admin/login");
 
   return (
     <div className="min-h-screen">
       <header className="flex items-center justify-between border-b border-brand-100 bg-white px-6 py-4">
-        <span className="font-semibold text-brand-900">뮤즈바이 관리자 · {email}</span>
+        <span className="font-semibold text-brand-900">뮤즈바이 관리자</span>
         <form action={adminLogout}>
           <button
             type="submit"

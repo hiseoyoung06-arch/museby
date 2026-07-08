@@ -10,8 +10,7 @@
   - `/brand/events/new`: 캠페인명 / 당첨 상품 / 당첨 명수 / 최종 업로드 예정일 / 정보 수집 방식(이메일 또는 배송지) / 주의사항을 입력해 이벤트 생성
   - `/brand/events/[id]`: 생성된 폼 링크 확인·복사, 제출된 당첨자 목록 조회, 당첨 상품 전달 여부 체크
 - **인플루언서** (`/f/[slug]`): 전달받은 링크로 접속해 채널명/성함/연락처/이메일 또는 배송지+우편번호를 입력하고 개인정보 수집 동의 후 제출
-- **뮤즈바이 관리자** (`/admin/login`): `ADMIN_EMAIL_DOMAIN`으로 끝나는 이메일 +
-  공용 비밀번호(`ADMIN_PASSWORD`)로 로그인 (개별 계정 없음)
+- **뮤즈바이 관리자** (`/admin/login`): 공용 비밀번호(`ADMIN_PASSWORD`)만 입력하면 로그인 (개별 계정 없음)
   - `/admin/dashboard`: 모든 브랜드의 댓글 이벤트 목록
   - `/admin/events/[id]`: 제출된 정보 조회, 전달 여부 체크, 정보 수정
 
@@ -31,7 +30,7 @@
 3. `.env.example` 을 `.env.local` 로 복사하고 값을 채웁니다.
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` 는 Supabase 프로젝트 설정 > API 에서 확인
    - `BRAND_SESSION_SECRET` 은 `openssl rand -hex 32` 등으로 생성한 임의의 긴 문자열
-   - `ADMIN_EMAIL_DOMAIN`, `ADMIN_PASSWORD` 는 뮤즈바이 관리자 로그인에 쓸 도메인/공용 비밀번호
+   - `ADMIN_PASSWORD` 는 뮤즈바이 관리자 로그인에 쓸 공용 비밀번호
 4. 의존성 설치 후 개발 서버 실행
 
    ```bash
@@ -46,7 +45,7 @@
   기능에 대한 것들이며, 모두 Next 16에서만 완전히 해결됩니다(App Router의
   `cookies()`/`params`가 비동기로 바뀌는 큰 변경이 필요해 이번 MVP 범위에서는
   보류했습니다).
-- 관리자 로그인은 개인별 계정이 아니라 "회사 도메인 이메일 + 공용 비밀번호"
-  하나만 확인합니다. 누가 로그인했는지 감사 로그가 필요하거나 인원별로 접근을
-  차단해야 한다면 이후 Supabase Auth 등 개별 계정 체계로 교체가 필요합니다.
+- 관리자 로그인은 개인별 계정이 아니라 공용 비밀번호 하나만 확인합니다.
+  누가 로그인했는지 감사 로그가 필요하거나 인원별로 접근을 차단해야 한다면
+  이후 Supabase Auth 등 개별 계정 체계로 교체가 필요합니다.
 - 최종 업로드 예정일 + 7일 마감 문구는 서버 로컬 시간대 기준 달력 날짜로 계산합니다.

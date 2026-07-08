@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 
 const COOKIE_NAME = "museby_admin_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
+const SESSION_SUBJECT = "museby-admin";
 
 function getSecret() {
   const secret = process.env.BRAND_SESSION_SECRET;
@@ -13,12 +14,12 @@ function getSecret() {
   return secret;
 }
 
-function sign(email: string) {
-  return createHmac("sha256", getSecret()).update(email).digest("hex");
+function sign(subject: string) {
+  return createHmac("sha256", getSecret()).update(subject).digest("hex");
 }
 
-export function setAdminSession(email: string) {
-  const token = `${email}.${sign(email)}`;
+export function setAdminSession() {
+  const token = `${SESSION_SUBJECT}.${sign(SESSION_SUBJECT)}`;
   cookies().set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -32,21 +33,20 @@ export function clearAdminSession() {
   cookies().delete(COOKIE_NAME);
 }
 
-/** Reads and verifies the admin session cookie, returning the admin email or null. */
-export function getAdminEmailFromSession(): string | null {
+/** Reads and verifies the admin session cookie. */
+export function hasAdminSession(): boolean {
   const token = cookies().get(COOKIE_NAME)?.value;
-  if (!token) return null;
+  if (!token) return false;
 
   const separatorIndex = token.lastIndexOf(".");
-  if (separatorIndex === -1) return null;
+  if (separatorIndex === -1) return false;
 
-  const email = token.slice(0, separatorIndex);
+  const subject = token.slice(0, separatorIndex);
   const signature = token.slice(separatorIndex + 1);
-  const expected = sign(email);
+  if (subject !== SESSION_SUBJECT) return false;
 
+  const expected = sign(subject);
   const a = Buffer.from(signature);
   const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-
-  return email;
+  return a.length === b.length && timingSafeEqual(a, b);
 }
